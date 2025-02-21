@@ -1,0 +1,48 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          pip install flake8 pytest
+
+      - name: Lint Python Files
+        run: |
+          flake8 basic-versioning/app.py sensor-api/app.py sensor-api/test_app.py
+
+      - name: Lint Dockerfiles
+        run: |
+          docker run --rm -i hadolint/hadolint < basic-versioning/Dockerfile
+          docker run --rm -i hadolint/hadolint < sensor-api/Dockerfile
+
+      - name: Build Docker Images
+        run: |
+          docker build -t basic-versioning:latest basic-versioning/
+          docker build -t sensor-api:latest sensor-api/
+
+      - name: Run Unit Tests
+        run: |
+          pytest sensor-api/test_app.py
+
+      - name: Check Version Endpoint (if applicable)
+        run: |
+          curl -s http://localhost:5000/version | grep "expected_version"
