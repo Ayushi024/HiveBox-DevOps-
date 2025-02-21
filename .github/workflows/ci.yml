@@ -33,10 +33,11 @@ jobs:
         run: |
           flake8 --ignore=E501 basic-versioning/app.py sensor-api/app.py sensor-api/test_app.py
 
-      - name: Lint Dockerfiles
-        run: |
-          docker run --rm -i hadolint/hadolint --ignore DL3008 < basic-versioning/Dockerfile
-          docker run --rm -i hadolint/hadolint --ignore DL3008 < sensor-api/Dockerfile
+      - - name: Lint Dockerfiles
+  run: |
+    docker run --rm -v $PWD/basic-versioning/Dockerfile:/Dockerfile hadolint/hadolint hadolint --ignore DL3008 /Dockerfile
+    docker run --rm -v $PWD/sensor-api/Dockerfile:/Dockerfile hadolint/hadolint hadolint --ignore DL3008 /Dockerfile
+
 
       - name: Build Docker Images
         run: |
