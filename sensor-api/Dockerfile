@@ -9,8 +9,10 @@ RUN useradd -m appuser
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends python3-pip && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3-pip=$(apt-cache madison python3-pip | awk '{print $3}' | head -1) && \
     rm -rf /var/lib/apt/lists/*
+
 
 
 # Install required Python packages with pinned versions
