@@ -12,11 +12,13 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install system dependencies with pinned versions
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3-pip=23.0.1-1 && \
+    apt-get install -y --no-install-recommends python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-# Install required Python packages with pinned versions
+# Upgrade pip to the latest version
+RUN python -m pip install --upgrade pip
 
+# Install required Python packages with pinned versions
 RUN pip install --no-cache-dir flask==3.1.0 requests==2.32.3 python-dotenv==1.0.1
 
 # Copy application files
