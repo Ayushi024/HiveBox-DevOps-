@@ -1,4 +1,4 @@
-# Use a lightweight Python image
+# Use the official Python 3.12.7 slim image
 FROM python:3.12.7-slim
 
 # Set environment variables
@@ -9,12 +9,11 @@ RUN useradd -m appuser
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends python3-pip=25.0.1 && \
+    rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install required Python packages
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir flask==3.0.0 requests==2.31.0 python-dotenv==1.0.1
+# Install required Python packages with pinned versions
+RUN pip install --no-cache-dir flask==3.1.0 requests==2.32.3 python-dotenv==1.0.1
 
 # Copy application files
 COPY . .
