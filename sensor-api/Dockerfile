@@ -12,7 +12,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install system dependencies with pinned versions
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3-pip=23.0.1-1 && \
+    apt-get install -y --no-install-recommends python3-pip="$(apt-cache madison python3-pip | awk '{print $3}' | head -1)" && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages with pinned versions
