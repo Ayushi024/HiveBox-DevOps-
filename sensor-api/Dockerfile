@@ -4,25 +4,25 @@ FROM python:3.12.7-slim
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Set a non-root user for security
-RUN useradd -m appuser
+# Set working directory
 WORKDIR /app
+
+# Use bash shell with pipefail to handle errors properly
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3-pip=$(apt-cache madison python3-pip | awk '{print $3}' | head -1) && \
+    apt-get install -y --no-install-recommends python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-
-
 # Install required Python packages with pinned versions
-RUN pip install --no-cache-dir flask==3.1.0 requests==2.32.3 python-dotenv==1.0.1
+RUN pip install --no-cache-dir --prefer-final flask==3.1.0 requests==2.32.3 python-dotenv==1.0.1
 
 # Copy application files
 COPY . .
 
-# Set permissions
-RUN chown -R appuser:appuser /app
+# Set a non-root user for security
+RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
 # Expose port
