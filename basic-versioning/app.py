@@ -1,7 +1,7 @@
 """
 Simple script to print the application version.
 
-This script defines a version constant and prints the app version 
+This script defines a version constant and prints the app version
 when executed. It exits with a status code of 0.
 """
 
