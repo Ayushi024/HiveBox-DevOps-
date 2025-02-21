@@ -1,5 +1,5 @@
 # Use a lightweight Python image
-FROM python:3.9-slim
+FROM python:3.12.7-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
@@ -9,10 +9,12 @@ RUN useradd -m appuser
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y python3-pip
+RUN apt-get update && apt-get install -y --no-install-recommends python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install required Python packages directly
-RUN pip install --no-cache-dir flask requests python-dotenv
+# Upgrade pip and install required Python packages
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir flask==3.0.0 requests==2.31.0 python-dotenv==1.0.1
 
 # Copy application files
 COPY . .
