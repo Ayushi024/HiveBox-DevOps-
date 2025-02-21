@@ -10,9 +10,9 @@ WORKDIR /app
 # Use bash shell with pipefail to handle errors properly
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Install system dependencies
+# Install system dependencies with pinned versions
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3-pip && \
+    apt-get install -y --no-install-recommends python3-pip=23.0.1-1 && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages with pinned versions
