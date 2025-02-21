@@ -35,8 +35,8 @@ jobs:
 
       - name: Lint Dockerfiles
         run: |
-          docker run --rm -v $PWD/basic-versioning/Dockerfile:/Dockerfile hadolint/hadolint hadolint --ignore=DL3008 /Dockerfile
-          docker run --rm -v $PWD/sensor-api/Dockerfile:/Dockerfile hadolint/hadolint hadolint --ignore=DL3008 /Dockerfile
+          docker run --rm -v "$(pwd)/basic-versioning/Dockerfile:/Dockerfile" hadolint/hadolint hadolint --ignore=DL3008 /Dockerfile
+          docker run --rm -v "$(pwd)/sensor-api/Dockerfile:/Dockerfile" hadolint/hadolint hadolint --ignore=DL3008 /Dockerfile
 
       - name: Build Docker Images
         run: |
@@ -47,19 +47,25 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
       - name: Push Docker Images
         run: |
-          docker tag basic-versioning:latest mydockerhub/basic-versioning:latest
-          docker tag sensor-api:latest mydockerhub/sensor-api:latest
-          docker push mydockerhub/basic-versioning:latest
-          docker push mydockerhub/sensor-api:latest
+          docker tag basic-versioning:latest ${{ secrets.DOCKER_USERNAME }}/basic-versioning:latest
+          docker tag sensor-api:latest ${{ secrets.DOCKER_USERNAME }}/sensor-api:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/basic-versioning:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/sensor-api:latest
 
       - name: Start Flask App in Docker
         run: |
           docker run -d -p 5000:5000 sensor-api:latest
-          sleep 5
+          for i in {1..10}; do
+            if curl -s http://localhost:5000/version; then
+              break
+            fi
+            echo "Waiting for service to start..."
+            sleep 2
+          done
 
       - name: Run Unit Tests
         run: |
