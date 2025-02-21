@@ -16,7 +16,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages with pinned versions
-RUN pip install --no-cache-dir --prefer-final flask==3.1.0 requests==2.32.3 python-dotenv==1.0.1
+RUN pip install --no-cache-dir flask==3.1.0 requests==2.32.3 python-dotenv==1.0.1
 
 # Copy application files
 COPY . .
