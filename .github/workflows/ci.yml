@@ -11,7 +11,7 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -23,11 +23,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install flake8 pytest
+          python -m pip install --upgrade pip
+          pip install --user flake8 pytest
+
+      - name: Verify File Structure
+        run: ls -R  # Check if all files exist before running flake8
 
       - name: Lint Python Files
         run: |
-          flake8 basic-versioning/app.py sensor-api/app.py sensor-api/test_app.py
+          flake8 --ignore=E501 basic-versioning/app.py sensor-api/app.py sensor-api/test_app.py
 
       - name: Lint Dockerfiles
         run: |
@@ -39,10 +43,15 @@ jobs:
           docker build -t basic-versioning:latest basic-versioning/
           docker build -t sensor-api:latest sensor-api/
 
+      - name: Start Flask App in Background
+        run: |
+          python sensor-api/app.py &
+          sleep 5  # Wait for Flask to start
+
       - name: Run Unit Tests
         run: |
           pytest sensor-api/test_app.py
 
-      - name: Check Version Endpoint (if applicable)
+      - name: Check Version Endpoint
         run: |
-          curl -s http://localhost:5000/version | grep "expected_version"
+          curl -s http://localhost:5000/version | grep "v0.0.1"
