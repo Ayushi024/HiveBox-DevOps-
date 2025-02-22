@@ -57,15 +57,18 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/sensor-api:latest
 
       - name: Set Environment Variables
-        run: echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" >> $GITHUB_ENV
+        run: |
+          echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" >> $GITHUB_ENV
+          echo "FLASK_APP=app.py" >> $GITHUB_ENV
+          echo "FLASK_RUN_HOST=0.0.0.0" >> $GITHUB_ENV
 
       - name: Start Flask Apps in Docker
         run: |
           docker network create my_network  # Create a network for inter-container communication
           
-          docker run -d --name basic-versioning --network my_network -p 5001:5000 basic-versioning:latest
-          docker run -d --name sensor-api --network my_network -p 5000:5000 sensor-api:latest
-          
+          docker run -d --name basic-versioning --network my_network -p 5001:5000 basic-versioning:latest flask run --host=0.0.0.0
+          docker run -d --name sensor-api --network my_network -p 5000:5000 -e OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }} sensor-api:latest flask run --host=0.0.0.0
+
           echo "Waiting for services to start..."
           sleep 5
           
