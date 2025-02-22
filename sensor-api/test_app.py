@@ -19,8 +19,8 @@ class TestApp(unittest.TestCase):
 
     def test_version_endpoint(self):
         """
-        Test if the /version endpoint returns a 200 status and contains 
-        'version' in the response JSON.
+        Test if the /version endpoint returns a 200 status
+        and contains 'version' in the response JSON.
         """
         response = self.client.get("/version")
         self.assertEqual(response.status_code, 200)
