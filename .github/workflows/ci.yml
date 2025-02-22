@@ -90,7 +90,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ayushi0024/versioning-api:latest -f basic-versioning/Dockerfile .
+          docker build -t ayushi0024/versioning-api:latest -f basic-versioning/Dockerfile basic-versioning/
           docker push ayushi0024/versioning-api:latest
 
   build_sensor:
@@ -105,5 +105,5 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ayushi0024/sensor-api:latest -f sensor-api/Dockerfile .
+          docker build -t ayushi0024/sensor-api:latest -f sensor-api/Dockerfile sensor-api/
           docker push ayushi0024/sensor-api:latest
