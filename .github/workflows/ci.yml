@@ -48,7 +48,7 @@ jobs:
           pip install pytest
 
       - name: Run Tests
-        run: pytest basic-versioning/test_version.py
+        run: pytest basic-versioning/app.py
 
   test_sensor:
     name: Run Unit Tests for Sensor API
@@ -68,7 +68,7 @@ jobs:
           pip install pytest
 
       - name: Run Tests
-        run: pytest sensor-api/test_sensor.py
+        run: pytest sensor-api/test_app.py
 
   build_versioning:
     name: Build and Push Versioning API Docker Image
@@ -97,5 +97,5 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t yourdockerhubusername/sensor-api:latest -f sensor-api/Dockerfile .
-          docker push yourdockerhubusername/sensor-api:latest
+          docker build -t ayushi0024/sensor-api:latest -f sensor-api/Dockerfile .
+          docker push ayushi0024/sensor-api:latest
