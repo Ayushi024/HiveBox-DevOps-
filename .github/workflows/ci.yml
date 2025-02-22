@@ -16,6 +16,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Install Docker and Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io docker-compose
+          sudo usermod -aG docker $USER
+
+      - name: Start Docker Service
+        run: |
+          sudo systemctl enable --now docker
+          sudo systemctl restart docker
+          docker --version
+          docker-compose --version
+
       - name: Set Up Python
         uses: actions/setup-python@v4
         with:
@@ -27,7 +40,7 @@ jobs:
           pip install --user flake8 pytest requests python-dotenv
 
       - name: Verify File Structure
-        run: ls -R  # Check if all files exist before running flake8
+        run: ls -R # Check if all files exist before running flake8
 
       - name: Lint Python Files
         run: flake8 --ignore=E501 basic-versioning/app.py sensor-api/app.py sensor-api/test_app.py
@@ -50,15 +63,6 @@ jobs:
 
           docker push ${{ secrets.DOCKER_USERNAME }}/basic-versioning:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/sensor-api:latest
-
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-
-      - name: Restart Docker Service
-        run: |
-          sudo systemctl restart docker
 
       - name: Create .env File
         run: |
