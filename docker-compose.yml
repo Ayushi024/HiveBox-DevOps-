@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  sensor-api:
+    build: ./sensor-api
+    ports:
+      - "5000:5000"
+    networks:
+      - my_network
+    environment:
+      - FLASK_ENV=production
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}  # Set in .env file
+
+  basic-versioning:
+    build: ./basic-versioning
+    networks:
+      - my_network
+    command: ["python", "app.py"]  # Ensures it runs properly
+
+networks:
+  my_network:
+    driver: bridge
+
