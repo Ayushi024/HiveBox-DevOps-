@@ -56,6 +56,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y docker-compose
 
+      - name: Restart Docker Service
+        run: |
+          sudo systemctl restart docker
+
       - name: Create .env File
         run: |
           echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" > .env
