@@ -47,8 +47,11 @@ jobs:
           pip install -r basic-versioning/requirements.txt
           pip install pytest
 
+      - name: Debug CI Files
+        run: ls -R basic-versioning
+
       - name: Run Tests
-        run: pytest basic-versioning/app.py
+        run: pytest basic-versioning/test_version.py
 
   test_sensor:
     name: Run Unit Tests for Sensor API
@@ -82,8 +85,8 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t yourdockerhubusername/sensor-api:latest -f sensor-api/Dockerfile sensor-api/
-          docker push yourdockerhubusername/versioning-api:latest
+          docker build -t ayushi0024/versioning-api:latest -f basic-versioning/Dockerfile .
+          docker push ayushi0024/versioning-api:latest
 
   build_sensor:
     name: Build and Push Sensor API Docker Image
