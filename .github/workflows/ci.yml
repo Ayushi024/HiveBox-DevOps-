@@ -27,7 +27,7 @@ jobs:
           pip install --user flake8 pytest flask requests python-dotenv
 
       - name: Verify File Structure
-        run: ls -R # Check if all files exist before running flake8
+        run: ls -R  # Check if all files exist before running flake8
 
       - name: Lint Python Files
         run: |
@@ -56,19 +56,22 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/basic-versioning:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/sensor-api:latest
 
-      - name: Start Flask App in Docker
-        run: |
-          docker run -d -p 5000:5000 sensor-api:latest
-          for i in {1..10}; do
-            if curl -s http://localhost:5000/version; then
-              break
-            fi
-            echo "Waiting for service to start..."
-            sleep 2
-          done
-
       - name: Set Environment Variables
         run: echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Start Flask Apps in Docker
+        run: |
+          docker network create my_network  # Create a network for inter-container communication
+          
+          docker run -d --name basic-versioning --network my_network -p 5001:5000 basic-versioning:latest
+          docker run -d --name sensor-api --network my_network -p 5000:5000 sensor-api:latest
+          
+          echo "Waiting for services to start..."
+          sleep 5
+          
+          docker ps -a  # Show running containers
+          docker logs basic-versioning  # Logs for basic-versioning
+          docker logs sensor-api  # Logs for sensor-api
 
       - name: Run Unit Tests
         run: |
@@ -76,4 +79,4 @@ jobs:
 
       - name: Check Version Endpoint
         run: |
-          curl -s http://localhost:5000/version | grep "v0.0.1"
+          curl -s http://localhost:5001/version | grep '"version": "v0.0.1"'
