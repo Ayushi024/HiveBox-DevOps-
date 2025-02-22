@@ -35,8 +35,8 @@ jobs:
 
       - name: Lint Dockerfiles
         run: |
-          docker run --rm -v "$(pwd)/basic-versioning/Dockerfile:/Dockerfile" hadolint/hadolint hadolint --ignore=DL3008 /Dockerfile
-          docker run --rm -v "$(pwd)/sensor-api/Dockerfile:/Dockerfile" hadolint/hadolint hadolint --ignore=DL3008 /Dockerfile
+          docker run --rm -v "${{ github.workspace }}/basic-versioning/Dockerfile:/Dockerfile" hadolint/hadolint hadolint --ignore=DL3008 /Dockerfile
+          docker run --rm -v "${{ github.workspace }}/sensor-api/Dockerfile:/Dockerfile" hadolint/hadolint hadolint --ignore=DL3008 /Dockerfile
 
       - name: Build Docker Images
         run: |
@@ -44,11 +44,10 @@ jobs:
           docker build -t sensor-api:latest sensor-api/
 
       - name: Log in to Docker Hub
-  uses: docker/login-action@v2
-  with:
-    username: ${{ secrets.DOCKER_USERNAME }}
-    password: ${{ secrets.DOCKER_PASSWORD }}
-
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push Docker Images
         run: |
