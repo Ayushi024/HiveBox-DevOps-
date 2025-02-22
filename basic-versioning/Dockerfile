@@ -1,7 +1,8 @@
-FROM python:3.12.7
+FROM python:3.12
 
 WORKDIR /app
+COPY . /app
 
-COPY app.py .
+RUN pip install --no-cache-dir flask
 
-ENTRYPOINT ["python", "app.py"]
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5001"]

@@ -1,20 +1,13 @@
-"""
-Simple script to print the application version.
+from flask import Flask
 
-This script defines a version constant and prints the app version
-when executed. It exits with a status code of 0.
-"""
-
-import sys
+app = Flask(__name__)
 
 VERSION = "v0.0.1"
 
-
-def print_version():
-    """Prints the application version and exits."""
-    print(f"App Version: {VERSION}")
-    sys.exit(0)
-
+@app.route("/version")
+def version():
+    """Returns the application version."""
+    return {"version": VERSION}
 
 if __name__ == "__main__":
-    print_version()
+    app.run(host="0.0.0.0", port=5001)  # Keeps the process running!
