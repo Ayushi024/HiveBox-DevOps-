@@ -24,7 +24,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --user flake8 pytest flask requests python-dotenvs
+          pip install --user flake8 pytest flask requests python-dotenv
 
       - name: Verify File Structure
         run: ls -R # Check if all files exist before running flake8
