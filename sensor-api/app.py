@@ -32,7 +32,10 @@ def get_version():
 def get_temperature():
     """Fetches the latest temperature data from OpenWeather API."""
     city = "Delhi"
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={OPENWEATHER_API_KEY}&units=metric"
+    url = (
+        "https://api.openweathermap.org/data/2.5/weather"
+        f"?q={city}&appid={OPENWEATHER_API_KEY}&units=metric"
+    )
 
     response = requests.get(url)
 
@@ -40,11 +43,11 @@ def get_temperature():
         data = response.json()
         temp = data["main"]["temp"]
         return jsonify({"temperature_celsius": temp})
-    else:
-        return (
-            jsonify({"error": "Failed to fetch data", "details": response.text}),
-            response.status_code,
-        )
+
+    return (
+        jsonify({"error": "Failed to fetch data", "details": response.text}),
+        response.status_code,
+    )
 
 
 if __name__ == "__main__":

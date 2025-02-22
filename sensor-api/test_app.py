@@ -24,7 +24,11 @@ class TestApp(unittest.TestCase):
         self.assertIn("version", response.json)
 
     def test_temperature_endpoint(self):
-        """Test if the /temperature endpoint returns an expected status code (API-dependent)."""
+        """
+        Test if the /temperature endpoint returns an expected status code.
+
+        The status code depends on external API responses.
+        """
         response = self.client.get("/temperature")
         self.assertIn(response.status_code, [200, 404, 500])  # API-dependent
 
