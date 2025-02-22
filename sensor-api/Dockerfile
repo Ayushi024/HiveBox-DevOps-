@@ -1,4 +1,4 @@
-# Use the official Python 3.12.7 slim image
+# Use the official Python 3.12.7 slim image for a smaller footprint
 FROM python:3.12.7-slim
 
 # Set environment variables
@@ -15,18 +15,19 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends python3-pip="$(apt-cache madison python3-pip | awk '{print $3}' | head -1)" && \
     rm -rf /var/lib/apt/lists/*
 
-# Install required Python packages with pinned versions
-RUN pip install --no-cache-dir flask==3.1.0 requests==2.32.3 python-dotenv==1.0.1
+# Copy requirements file and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY . .
 
-# Set a non-root user for security
+# Create a non-root user for security and switch to it
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
+# Expose port 5000 for Flask
 EXPOSE 5000
 
-# Start the Flask app
+# Run the application
 CMD ["python", "app.py"]
