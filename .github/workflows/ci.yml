@@ -24,24 +24,18 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --user flake8 pytest flask requests python-dotenv
+          pip install --user flake8 pytest requests python-dotenv
 
       - name: Verify File Structure
         run: ls -R  # Check if all files exist before running flake8
 
       - name: Lint Python Files
-        run: |
-          flake8 --ignore=E501 basic-versioning/app.py sensor-api/app.py sensor-api/test_app.py
+        run: flake8 --ignore=E501 basic-versioning/app.py sensor-api/app.py sensor-api/test_app.py
 
       - name: Lint Dockerfiles
         run: |
           docker run --rm -v "${{ github.workspace }}/basic-versioning/Dockerfile:/Dockerfile" hadolint/hadolint hadolint --ignore=DL3008 /Dockerfile
           docker run --rm -v "${{ github.workspace }}/sensor-api/Dockerfile:/Dockerfile" hadolint/hadolint hadolint --ignore=DL3008 /Dockerfile
-
-      - name: Build Docker Images
-        run: |
-          docker build -t basic-versioning:latest basic-versioning/
-          docker build -t sensor-api:latest sensor-api/
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -49,37 +43,34 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker Images
+      - name: Build and Push Docker Images
         run: |
-          docker tag basic-versioning:latest ${{ secrets.DOCKER_USERNAME }}/basic-versioning:latest
-          docker tag sensor-api:latest ${{ secrets.DOCKER_USERNAME }}/sensor-api:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/basic-versioning:latest basic-versioning/
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/sensor-api:latest sensor-api/
+
           docker push ${{ secrets.DOCKER_USERNAME }}/basic-versioning:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/sensor-api:latest
 
-      - name: Set Environment Variables
+      - name: Create .env File
         run: |
-          echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" >> $GITHUB_ENV
-          echo "FLASK_APP=app.py" >> $GITHUB_ENV
-          echo "FLASK_RUN_HOST=0.0.0.0" >> $GITHUB_ENV
+          echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" > .env
 
-      - name: Start Flask Apps in Docker
-        run: |
-          docker network create my_network  # Create a network for inter-container communication
-          
-          docker run -d --name basic-versioning --network my_network -p 5001:5000 basic-versioning:latest flask run --host=0.0.0.0
-          docker run -d --name sensor-api --network my_network -p 5000:5000 -e OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }} sensor-api:latest flask run --host=0.0.0.0
+      - name: Start Services with Docker Compose
+        run: docker-compose up -d --build
 
-          echo "Waiting for services to start..."
-          sleep 5
-          
-          docker ps -a  # Show running containers
-          docker logs basic-versioning  # Logs for basic-versioning
-          docker logs sensor-api  # Logs for sensor-api
+      - name: Wait for Services to Start
+        run: sleep 10
 
-      - name: Run Unit Tests
-        run: |
-          pytest sensor-api/test_app.py
+      - name: Check Running Containers
+        run: docker ps -a
 
-      - name: Check Version Endpoint
+      - name: Run Unit Tests in Sensor API
+        run: docker exec $(docker ps -qf "name=sensor-api") pytest sensor-api/test_app.py
+
+      - name: Test API Endpoints
         run: |
           curl -s http://localhost:5001/version | grep '"version": "v0.0.1"'
+          curl -s http://localhost:5000/health | grep '"status": "ok"'
+
+      - name: Stop and Clean Up Containers
+        run: docker-compose down
