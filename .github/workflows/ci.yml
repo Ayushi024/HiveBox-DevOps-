@@ -67,6 +67,9 @@ jobs:
             sleep 2
           done
 
+      - name: Set Environment Variables
+        run: echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" >> $GITHUB_ENV
+
       - name: Run Unit Tests
         run: |
           pytest sensor-api/test_app.py
