@@ -16,7 +16,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file and install dependencies
-COPY requirements.txt .
+COPY sensor-api/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files

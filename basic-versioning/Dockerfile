@@ -8,7 +8,7 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1
 
 # Copy dependencies file and install dependencies
-COPY requirements.txt .
+COPY basic-versioning/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code

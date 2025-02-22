@@ -82,7 +82,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t yourdockerhubusername/versioning-api:latest -f basic-versioning/Dockerfile .
+          docker build -t yourdockerhubusername/sensor-api:latest -f sensor-api/Dockerfile sensor-api/
           docker push yourdockerhubusername/versioning-api:latest
 
   build_sensor:
