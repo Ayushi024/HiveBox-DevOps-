@@ -25,10 +25,10 @@ jobs:
         run: pip install flake8
 
       - name: Lint basic-versioning
-        run: flake8 basic-versioning/
+        run: flake8 --max-line-length=88 basic-versioning/
 
       - name: Lint sensor-api
-        run: flake8 sensor-api/
+        run: flake8 --max-line-length=88 sensor-api/
 
   test_versioning:
     name: Run Unit Tests for Versioning API
@@ -51,7 +51,7 @@ jobs:
         run: ls -R basic-versioning
 
       - name: Run Tests
-        run: pytest basic-versioning/test_version.py
+        run: pytest basic-versioning/test_version.py --tb=short
 
   test_sensor:
     name: Run Unit Tests for Sensor API
@@ -70,8 +70,13 @@ jobs:
           pip install -r sensor-api/requirements.txt
           pip install pytest
 
+      - name: Debug CI Files
+        run: ls -R sensor-api
+
       - name: Run Tests
-        run: pytest sensor-api/test_app.py
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+        run: pytest sensor-api/test_app.py --tb=short
 
   build_versioning:
     name: Build and Push Versioning API Docker Image
