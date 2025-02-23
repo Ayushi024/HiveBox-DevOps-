@@ -1,25 +1,39 @@
 """
 Simple script to print the application version.
 
-This script defines a version constant and provides an API endpoint
+This script defines a version constant and provides API endpoints
 to return the version as a JSON response.
 """
 
 from flask import Flask, jsonify
 
+# Initialize Flask application
 app = Flask(__name__)
 
+# Define the application version
 VERSION = "v0.0.1"
+
 
 @app.route("/")
 def home():
-    """Returns a welcome message."""
+    """
+    Returns a welcome message.
+    
+    This helps users understand the API and directs them to the correct endpoint.
+    """
     return "Welcome to the Versioning API. Try /version"
+
 
 @app.route("/version")
 def get_version():
-    """Returns the application version as JSON."""
+    """
+    Returns the application version as a JSON response.
+    
+    This allows clients to retrieve the version programmatically.
+    """
     return jsonify({"version": VERSION})
 
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001)  # Bind to all network interfaces
+    # Run the Flask application on port 5001, accessible from any network interface.
+    app.run(host="0.0.0.0", port=5001)
