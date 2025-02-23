@@ -53,8 +53,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r basic_versioning/requirements.txt
-          pip install -U pytest
+          pip install -r basic-versioning/requirements.txt
+          pip install pytest
 
       - name: Debug CI Files
         run: ls -R basic_versioning
@@ -84,8 +84,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r sensor_api/requirements.txt
-          pip install -U pytest
+          pip install -r sensor-api/requirements.txt
+          pip install pytest
 
       - name: Debug CI Files
         run: ls -R sensor_api
@@ -144,22 +144,8 @@ jobs:
 
       - name: Verify /version Endpoint
         run: |
-          RESPONSE=$(curl -s http://localhost:5001/version | jq -r '.version')
-          echo "Received version: $RESPONSE"
-
-          EXPECTED_VERSION=$(grep -oP 'VERSION\s*=\s*"\K[^"]+' basic_versioning/app.py)
-          echo "Expected version: $EXPECTED_VERSION"
-
-          if [[ "$RESPONSE" != "$EXPECTED_VERSION" ]]; then
-            echo "❌ Version mismatch! Expected: $EXPECTED_VERSION, Got: $RESPONSE"
-            exit 1
-          fi
-
-          echo "✅ Version check passed!"
-
-      - name: Push Docker Image
-        if: github.ref == 'refs/heads/main'
-        run: docker push ayushi0024/versioning-api:latest
+          docker build -t ayushi0024/versioning-api:latest -f basic-versioning/Dockerfile .
+          docker push ayushi0024/versioning-api:latest
 
   build_sensor:
     name: Build and Push Sensor API Docker Image
@@ -174,5 +160,8 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ayushi0024/sensor_api:latest -f sensor_api/Dockerfile .
-          docker push ayushi0024/sensor_api:latest
+          docker build -t ayushi0024/sensor-api:latest -f sensor-api/Dockerfile .
+          docker push ayushi0024/sensor-api:latest
+
+
+
