@@ -9,54 +9,103 @@ on:
       - main
 
 jobs:
-  build:
+  lint:
+    name: Lint Code for Both Services
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout the code
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      # Set up Python
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: "3.12"
 
-      # Install dependencies
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+      - name: Install Linting Tools
+        run: pip install flake8
 
-      # Log in to Docker Hub
-      - name: Log in to Docker Hub
-        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+      - name: Lint basic_versioning
+        run: flake8 --max-line-length=88 basic_versioning/
 
-      # Build Docker image
-      - name: Build Docker image
-        run: |
-          docker build -t my-app .
+      - name: Lint sensor_api
+        run: flake8 --max-line-length=88 sensor_api/
 
-      # Run tests with pytest
-      - name: Run tests
-        run: |
-          pytest sensor_api/test_app.py --tb=short
-
-      # Push the Docker image to Docker Hub (optional)
-      - name: Push Docker image
-        run: |
-          docker push my-app
-        if: github.ref == 'refs/heads/main'  # Only push on the main branch
-
-  # Optional job to check for security vulnerabilities (if you're using any security scanning tools)
-  security:
+  test_versioning:
+    name: Run Unit Tests for Versioning API
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Run security scan (example using a hypothetical tool)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install Dependencies
         run: |
-          # Example: Running a security scan tool (replace with your tool of choice)
-          safety check
+          pip install -r basic_versioning/requirements.txt
+          pip install pytest
+
+      - name: Debug CI Files
+        run: ls -R basic_versioning
+
+      - name: Run Tests
+        run: pytest basic_versioning/test_version.py --tb=short
+
+  test_sensor:
+    name: Run Unit Tests for Sensor API
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r sensor_api/requirements.txt
+          pip install pytest
+
+      - name: Debug CI Files
+        run: ls -R sensor_api
+
+      - name: Run Tests
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+        run: pytest sensor_api/test_app.py --tb=short
+
+  build_versioning:
+    name: Build and Push Versioning API Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ayushi0024/versioning-api:latest -f basic_versioning/Dockerfile .
+          docker push ayushi0024/versioning-api:latest
+
+  build_sensor:
+    name: Build and Push Sensor API Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ayushi0024/sensor_api:latest -f sensor_api/Dockerfile .
+          docker push ayushi0024/sensor_api:latest
+
+
