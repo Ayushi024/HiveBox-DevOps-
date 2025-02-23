@@ -9,6 +9,7 @@ on:
       - main
 
 jobs:
+
   lint:
     name: Lint Code for Both Services
     runs-on: ubuntu-latest
@@ -92,14 +93,14 @@ jobs:
         run: docker build -t ayushi0024/versioning-api:latest -f basic-versioning/Dockerfile .
 
       - name: Run Versioning API Container
-        run: docker run -d -p 5001:5001 --name versioning-api ayushi0024/versioning-api:latest
+        run: docker run -d -p 5001:5000 --name versioning-api ayushi0024/versioning-api:latest
 
       - name: Wait for API to Start
-        run: sleep 5
+        run: sleep 10  # Increased from 5 to 10 for stability
 
       - name: Verify /version Endpoint
         run: |
-          RESPONSE=$(curl -s http://localhost:5000/version)
+          RESPONSE=$(curl -s http://localhost:5001/version)
           echo "Received version: $RESPONSE"
           EXPECTED_VERSION=$(cat basic-versioning/version.txt)
           if [[ "$RESPONSE" != "$EXPECTED_VERSION" ]]; then
