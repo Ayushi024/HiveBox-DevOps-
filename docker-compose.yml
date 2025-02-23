@@ -1,8 +1,8 @@
 version: '3.8'
 
 services:
-  sensor-api:
-    build: ./sensor-api
+  sensor_api:
+    build: ./sensor_api
     ports:
       - "5000:5000"
     environment:
