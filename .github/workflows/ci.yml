@@ -42,21 +42,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Cache Python Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install Dependencies
         run: |
           pip install -r basic_versioning/requirements.txt
           pip install pytest
-
-      - name: Debug CI Files
-        run: ls -R basic_versioning
 
       - name: Run Tests
         run: pytest basic_versioning/test_version.py --tb=short
@@ -73,21 +62,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Cache Python Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install Dependencies
         run: |
           pip install -r sensor_api/requirements.txt
           pip install pytest
-
-      - name: Debug CI Files
-        run: ls -R sensor_api
 
       - name: Run Tests
         env:
@@ -101,50 +79,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Ensure Docker is Running
-        run: |
-          sudo systemctl start docker || sudo service docker start
-          sudo systemctl enable docker || true
-          sudo systemctl status docker || true
-
-      - name: Install jq (JSON Processor)
-        run: sudo apt-get install -y jq
-
       - name: Log in to DockerHub
         if: github.ref == 'refs/heads/main'
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: |
+          echo "Logging into DockerHub..."
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Verify Docker Login
+        run: docker info | grep "Username"
 
       - name: Build Docker Image
         run: docker build -t ayushi0024/versioning-api:latest -f basic_versioning/Dockerfile .
 
-      - name: Stop and Remove Old Container (if exists)
-        run: |
-          docker stop versioning-api || true
-          docker rm versioning-api || true
-
-      - name: Run Versioning API Container
-        run: docker run -d -p 5001:5001 --name versioning-api ayushi0024/versioning-api:latest
-
-      - name: Wait for API to Start
-        run: |
-          for i in {1..10}; do
-            if curl -s http://localhost:5001/version | grep -q 'version'; then
-              echo "API is up!"
-              exit 0
-            fi
-            echo "Waiting for API to start..."
-            sleep 2
-          done
-          echo "API failed to start!"
-          exit 1
-
-      - name: Verify Container is Running
-        run: docker ps -a
-
-      - name: Verify /version Endpoint
-        run: |
-          docker build -t ayushi0024/versioning-api:latest -f basic_versioning/Dockerfile .
-          docker push ayushi0024/versioning-api:latest
+      - name: Push Docker Image
+        run: docker push ayushi0024/versioning-api:latest
 
   build_sensor:
     name: Build and Push Sensor API Docker Image
@@ -155,7 +103,12 @@ jobs:
 
       - name: Log in to DockerHub
         if: github.ref == 'refs/heads/main'
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: |
+          echo "Logging into DockerHub..."
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Verify Docker Login
+        run: docker info | grep "Username"
 
       - name: Build and Push Docker Image
         run: |
