@@ -2,8 +2,8 @@
 
 This repository demonstrates a CI/CD pipeline for two services:  
 
-1. **Versioning API** (basic-versioning/)  
-2. **Sensor API** (sensor-api/)  
+1. **Versioning API** (basic_versioning/)  
+2. **Sensor API** (sensor_api/)  
 
 
 
@@ -50,8 +50,8 @@ We use **GitHub Secrets** to store sensitive information like **DockerHub creden
 ## 📌 4. Docker Setup  
 Each service has its own **Dockerfile**.  
 
-➡️ **Create Dockerfile** for **Versioning API** (`basic-versioning/Dockerfile`)  
-➡️ **Create Dockerfile** for **Sensor API** (`sensor-api/Dockerfile`)  
+➡️ **Create Dockerfile** for **Versioning API** (`basic_versioning/Dockerfile`)  
+➡️ **Create Dockerfile** for **Sensor API** (`sensor_api/Dockerfile`)  
 
 
 
