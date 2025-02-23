@@ -88,6 +88,11 @@ jobs:
       - name: Install curl
         run: sudo apt-get install curl
 
+      - name: Start the Service
+        run: |
+          nohup python3 -m basic_versioning.app &  # Adjust if necessary for your service
+          sleep 30  # Allow the service to start
+
       - name: Call /version endpoint
         run: |
           response=$(curl -s -w "%{http_code}" -o /dev/null http://localhost:5000/version) # Update with your actual endpoint if different
