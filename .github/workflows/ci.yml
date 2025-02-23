@@ -79,7 +79,7 @@ jobs:
         run: pytest sensor-api/test_app.py --tb=short
 
   build_versioning:
-    name: Build and Push Versioning API Docker Image
+    name: Build, Test & Push Versioning API
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -88,10 +88,27 @@ jobs:
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build and Push Docker Image
+      - name: Build Docker Image
+        run: docker build -t ayushi0024/versioning-api:latest -f basic-versioning/Dockerfile .
+
+      - name: Run Versioning API Container
+        run: docker run -d -p 5000:5000 --name versioning-api ayushi0024/versioning-api:latest
+
+      - name: Wait for API to Start
+        run: sleep 5
+
+      - name: Verify /version Endpoint
         run: |
-          docker build -t ayushi0024/versioning-api:latest -f basic-versioning/Dockerfile .
-          docker push ayushi0024/versioning-api:latest
+          RESPONSE=$(curl -s http://localhost:5000/version)
+          echo "Received version: $RESPONSE"
+          EXPECTED_VERSION=$(cat basic-versioning/version.txt)
+          if [[ "$RESPONSE" != "$EXPECTED_VERSION" ]]; then
+            echo "Version mismatch! Expected: $EXPECTED_VERSION, Got: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Push Docker Image
+        run: docker push ayushi0024/versioning-api:latest
 
   build_sensor:
     name: Build and Push Sensor API Docker Image
@@ -107,6 +124,3 @@ jobs:
         run: |
           docker build -t ayushi0024/sensor-api:latest -f sensor-api/Dockerfile .
           docker push ayushi0024/sensor-api:latest
-
-
-
