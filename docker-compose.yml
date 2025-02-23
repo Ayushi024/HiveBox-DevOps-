@@ -1,15 +1,15 @@
 version: '3.8'
 
 services:
-  sensor-api:
-    build: ./sensor-api
+  sensor_api:
+    build: ./sensor_api
     ports:
       - "5000:5000"
     environment:
       - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
     depends_on:
-      - basic-versioning
+      - basic_versioning
 
-  basic-versioning:
-    build: ./basic-versioning
+  basic_versioning:
+    build: ./basic_versioning
     command: ["python", "app.py"]

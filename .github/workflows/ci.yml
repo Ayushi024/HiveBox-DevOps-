@@ -25,11 +25,11 @@ jobs:
       - name: Install Linting Tools
         run: pip install flake8
 
-      - name: Lint basic-versioning
-        run: flake8 --max-line-length=88 basic-versioning/
+      - name: Lint basic_versioning
+        run: flake8 --max-line-length=88 basic_versioning/
 
-      - name: Lint sensor-api
-        run: flake8 --max-line-length=88 sensor-api/
+      - name: Lint sensor_api
+        run: flake8 --max-line-length=88 sensor_api/
 
   test_versioning:
     name: Run Unit Tests for Versioning API
@@ -45,14 +45,14 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r basic-versioning/requirements.txt
+          pip install -r basic_versioning/requirements.txt
           pip install pytest
 
       - name: Debug CI Files
-        run: ls -R basic-versioning
+        run: ls -R basic_versioning
 
       - name: Run Tests
-        run: pytest basic-versioning/test_version.py --tb=short
+        run: pytest basic_versioning/test_version.py --tb=short
 
   test_sensor:
     name: Run Unit Tests for Sensor API
@@ -68,16 +68,16 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r sensor-api/requirements.txt
+          pip install -r sensor_api/requirements.txt
           pip install pytest
 
       - name: Debug CI Files
-        run: ls -R sensor-api
+        run: ls -R sensor_api
 
       - name: Run Tests
         env:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
-        run: pytest sensor-api/test_app.py --tb=short
+        run: pytest sensor_api/test_app.py --tb=short
 
   build_versioning:
     name: Build, Test & Push Versioning API
@@ -96,7 +96,7 @@ jobs:
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build Docker Image
-        run: docker build -t ayushi0024/versioning-api:latest -f basic-versioning/Dockerfile .
+        run: docker build -t ayushi0024/versioning-api:latest -f basic_versioning/Dockerfile .
 
       - name: Run Versioning API Container
         run: docker run -d -p 5001:5001 --name versioning-api ayushi0024/versioning-api:latest
@@ -112,7 +112,7 @@ jobs:
           RESPONSE=$(curl -s http://localhost:5001/version | jq -r '.version')
           echo "Received version: $RESPONSE"
 
-          EXPECTED_VERSION=$(grep -oP 'VERSION\s*=\s*"\K[^"]+' basic-versioning/app.py)
+          EXPECTED_VERSION=$(grep -oP 'VERSION\s*=\s*"\K[^"]+' basic_versioning/app.py)
           echo "Expected version: $EXPECTED_VERSION"
 
           if [[ "$RESPONSE" != "$EXPECTED_VERSION" ]]; then
@@ -137,5 +137,5 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ayushi0024/sensor-api:latest -f sensor-api/Dockerfile .
-          docker push ayushi0024/sensor-api:latest
+          docker build -t ayushi0024/sensor_api:latest -f sensor_api/Dockerfile .
+          docker push ayushi0024/sensor_api:latest

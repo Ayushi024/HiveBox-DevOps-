@@ -8,11 +8,11 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1
 
 # Copy dependencies file and install dependencies
-COPY basic-versioning/requirements.txt .
+COPY basic_versioning/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY basic-versioning/app.py .
+COPY basic_versioning/app.py .
 
 # Create a non-root user for security and switch to it
 RUN useradd -m appuser && chown -R appuser:appuser /app
