@@ -18,7 +18,7 @@ VERSION = "v0.0.1"
 def home():
     """
     Returns a welcome message.
-    
+
     This helps users understand the API and directs them to the correct endpoint.
     """
     return "Welcome to the Versioning API. Try /version"
@@ -28,7 +28,7 @@ def home():
 def get_version():
     """
     Returns the application version as a JSON response.
-    
+
     This allows clients to retrieve the version programmatically.
     """
     return jsonify({"version": VERSION})
