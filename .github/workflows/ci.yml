@@ -22,7 +22,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install Linting Tools
-        run: pip install -U flake8
+        run: pip install flake8
 
       - name: Lint basic_versioning
         run: flake8 --max-line-length=88 basic_versioning/
@@ -47,6 +47,9 @@ jobs:
           pip install -r basic_versioning/requirements.txt
           pip install pytest
 
+      - name: Debug CI Files
+        run: ls -R basic_versioning
+
       - name: Run Tests
         run: pytest basic_versioning/test_version.py --tb=short
 
@@ -67,29 +70,59 @@ jobs:
           pip install -r sensor_api/requirements.txt
           pip install pytest
 
+      - name: Debug CI Files
+        run: ls -R sensor_api
+
       - name: Run Tests
         env:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
         run: pytest sensor_api/test_app.py --tb=short
 
   build_versioning:
-    name: Build, Test & Push Versioning API
+    name: Build and Push Versioning API Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Log in to DockerHub
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "Logging into DockerHub..."
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Verify Docker Login
-        run: docker info | grep "Username"
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build Docker Image
         run: docker build -t ayushi0024/versioning-api:latest -f basic_versioning/Dockerfile .
+
+      - name: Run Versioning API Container
+        run: docker run -d -p 5001:5001 --name versioning-api ayushi0024/versioning-api:latest
+
+      - name: Wait for API to Start
+        run: |
+          for i in {1..10}; do
+            if curl -s http://localhost:5001/version | grep -q 'version'; then
+              echo "API is up!"
+              exit 0
+            fi
+            echo "Waiting for API to start..."
+            sleep 2
+          done
+          echo "API failed to start!"
+          exit 1
+
+      - name: Verify /version Endpoint
+        run: |
+          RESPONSE=$(curl -s -o response.json -w "%{http_code}" http://localhost:5001/version)
+          echo "Response Code: $RESPONSE"
+          cat response.json
+          if [[ "$RESPONSE" != "200" ]]; then
+            echo "Error: /version endpoint did not return 200 OK"
+            exit 1
+          fi
+          EXPECTED_VERSION=$(cat basic_versioning/version.txt)
+          ACTUAL_VERSION=$(jq -r '.version' response.json)
+          if [[ "$ACTUAL_VERSION" != "$EXPECTED_VERSION" ]]; then
+            echo "Version mismatch! Expected: $EXPECTED_VERSION, Got: $ACTUAL_VERSION"
+            exit 1
+          fi
+          echo "Version endpoint returned the correct value!"
 
       - name: Push Docker Image
         run: docker push ayushi0024/versioning-api:latest
@@ -102,13 +135,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Log in to DockerHub
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "Logging into DockerHub..."
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Verify Docker Login
-        run: docker info | grep "Username"
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build and Push Docker Image
         run: |
