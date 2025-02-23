@@ -92,7 +92,7 @@ jobs:
         run: docker build -t ayushi0024/versioning-api:latest -f basic-versioning/Dockerfile .
 
       - name: Run Versioning API Container
-        run: docker run -d -p 5000:5000 --name versioning-api ayushi0024/versioning-api:latest
+        run: docker run -d -p 5001:5001 --name versioning-api ayushi0024/versioning-api:latest
 
       - name: Wait for API to Start
         run: sleep 5
