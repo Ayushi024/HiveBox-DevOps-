@@ -86,13 +86,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Start Docker Service
+      - name: Ensure Docker is Running
         run: |
-          sudo systemctl start docker
-          sudo systemctl enable docker
-
-      - name: Check Docker Status
-        run: sudo systemctl status docker || sudo service docker status
+          sudo systemctl start docker || sudo service docker start
+          sudo systemctl enable docker || true
+          sudo systemctl status docker || true
 
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -104,20 +102,25 @@ jobs:
         run: docker run -d -p 5001:5001 --name versioning-api ayushi0024/versioning-api:latest
 
       - name: Wait for API to Start
-        run: sleep 15  # Increased to 15 for stability
+        run: sleep 15  # Ensuring API is fully up before checking
 
       - name: Verify Container is Running
         run: docker ps -a
 
       - name: Verify /version Endpoint
         run: |
-          RESPONSE=$(curl -s http://localhost:5001/version)
+          RESPONSE=$(curl -s http://localhost:5001/version | jq -r '.version')
           echo "Received version: $RESPONSE"
-          EXPECTED_VERSION=$(cat basic-versioning/version.txt)
+
+          EXPECTED_VERSION=$(grep -oP 'VERSION\s*=\s*"\K[^"]+' basic-versioning/app.py)
+          echo "Expected version: $EXPECTED_VERSION"
+
           if [[ "$RESPONSE" != "$EXPECTED_VERSION" ]]; then
-            echo "Version mismatch! Expected: $EXPECTED_VERSION, Got: $RESPONSE"
+            echo "❌ Version mismatch! Expected: $EXPECTED_VERSION, Got: $RESPONSE"
             exit 1
           fi
+
+          echo "✅ Version check passed!"
 
       - name: Push Docker Image
         run: docker push ayushi0024/versioning-api:latest
