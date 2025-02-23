@@ -95,7 +95,7 @@ jobs:
 
       - name: Call /version endpoint
         run: |
-          response=$(curl -s -w "%{http_code}" -o /dev/null http://localhost:5000/version) # Update with your actual endpoint if different
+          response=$(curl -s -w "%{http_code}" -o /dev/null http://localhost:5001/version) # Update with your actual endpoint if different
           echo "Response code: $response"
           if [ "$response" -ne 200 ]; then
             echo "Error: /version endpoint returned $response"
