@@ -78,6 +78,25 @@ jobs:
           OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
         run: pytest sensor_api/test_app.py --tb=short
 
+  test_version_endpoint:
+    name: Test /version Endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install curl
+        run: sudo apt-get install curl
+
+      - name: Call /version endpoint
+        run: |
+          response=$(curl -s -w "%{http_code}" -o /dev/null http://localhost:5000/version) # Update with your actual endpoint if different
+          echo "Response code: $response"
+          if [ "$response" -ne 200 ]; then
+            echo "Error: /version endpoint returned $response"
+            exit 1
+          fi
+
   build_versioning:
     name: Build and Push Versioning API Docker Image
     runs-on: ubuntu-latest
@@ -107,5 +126,3 @@ jobs:
         run: |
           docker build -t ayushi0024/sensor_api:latest -f sensor_api/Dockerfile .
           docker push ayushi0024/sensor_api:latest
-
-
