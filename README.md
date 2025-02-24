@@ -70,3 +70,73 @@ You can also **manually trigger** it from the **GitHub Actions tab**.
 
 ### ➡️ How to Check CI/CD Status  
 Go to **GitHub → Actions tab** to view the **pipeline logs** and **debug failures**.  
+
+
+
+## 📌 Step-by-Step Workflow for Feature Branch Development & CI Integration     
+
+1️⃣ Clone the Main Repository (If Not Already Cloned)                                
+If you haven’t cloned your repository yet, run:                                
+git clone https://github.com/your-username/HiveBox-DevOps-.git                                
+cd HiveBox-DevOps-                                
+                                
+2️⃣ Set Up Branch Protection Rules (One-Time Setup)                                 
+Before creating feature branches, enforce CI checks before merging into main:                                
+Go to your repository on GitHub.                                
+Navigate to Settings → Branches.                                
+Under Branch Protection Rules, click Add Rule.                                
+Set Branch name pattern to main.                                
+Enable the following options:                                
+✅ Require status checks to pass before merging.                                
+✅ Select the required CI checks (GitHub will show available CI checks from Actions).                                
+✅ Require branches to be up to date before merging (optional but recommended).                                
+✅ Require pull request reviews before merging (optional for extra safety).                                
+Click Save Changes.                                
+
+3️⃣ Create a New Feature Branch                                
+Run the following command to create and switch to a new feature branch:                                
+git checkout -b feature-branch                                
+
+4️⃣ Pull the Latest Code from Main into the Feature Branch                                
+To ensure the feature branch is up to date with main:                                
+git pull origin main                                
+                                
+5️⃣ Make Changes in the Feature Branch                                
+Modify files, add new code, or update existing functionality.                                
+For example, update app.py or add a new feature.                                
+                                
+6️⃣ Commit the Changes                                
+Stage and commit your changes using Conventional Commits:                                
+git add .                                
+git commit -m "feat: add new feature"                                
+                                
+7️⃣ Push the Feature Branch to GitHub                                
+git push origin feature-branch                                
+
+8️⃣ Create a Pull Request (PR) in GitHub                                
+Go to your repository on GitHub.                                
+Click on Pull Requests → New Pull Request.                                
+Select feature-branch as the source and main as the target.                                
+Click Create Pull Request.                                
+                                
+9️⃣ CI Pipeline Runs Automatically on the PR                                
+GitHub Actions will trigger the CI pipeline from .github/workflows/ci.yml.                                
+The pipeline will:                                
+✅ Checkout the code                                
+✅ Install dependencies                                
+✅ Run tests (pytest tests/)                                
+✅ Lint code (flake8 app.py)                                
+
+🔟 Ensure CI Passes Before Merging                                
+Open the PR in GitHub.                                
+Click on the Checks tab.                                
+If all checks pass ✅ → The Merge button will be enabled.                                
+If any check fails ❌ → You must fix errors before merging.                                
+
+1️⃣1️⃣ Merge the PR into main (Only If CI Passes)                                
+Click Merge Pull Request.                                
+Delete the feature branch (optional but recommended):                                
+git branch -d feature-branch                                
+git push origin --delete feature-branch                                
+
+
